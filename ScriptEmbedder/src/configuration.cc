@@ -1,3 +1,10 @@
+/**
+ * @file
+ * @brief Implementation for the ScriptEmbedder::Configuration class defined in
+ * configuration.hh.
+ * @author Perttu Paarlahti 2016.
+ */
+
 #include "configuration.hh"
 #include <QFile>
 #include <QLibrary>
@@ -35,7 +42,7 @@ std::shared_ptr<ScriptAPI> Configuration::scriptAPI() const
 
 void Configuration::addInterpreter(const InterpreterEntry& interpreter)
 {
-    interpreters_[interpreter.ScriptLanguage] = interpreter;
+    interpreters_[interpreter.scriptLanguage] = interpreter;
 }
 
 
@@ -89,7 +96,7 @@ QString Configuration::errorString() const
     if (this->isValid()) return QString();
 
     if (api_ == nullptr){
-        return QString("ScriptAPI object has not been set.");
+        return QString("ScriptAPI has not been set.");
     }
     if (interpreters_.empty()){
         return QString("At liest one interpreter has to be set.");
@@ -111,6 +118,23 @@ QString Configuration::errorString() const
 
     Q_ASSERT(false);  // This should never be executed.
     return QString(); // Suppress warnings.
+}
+
+
+bool ScriptEntry::operator==(const ScriptEntry& rhs) const
+{
+    return this->id == rhs.id &&
+            this->scriptLanguage == rhs.scriptLanguage &&
+            this->scriptPath == rhs.scriptPath &&
+            this->readToRAM == rhs.readToRAM &&
+            this->priority == rhs.priority;
+}
+
+
+bool InterpreterEntry::operator==(const InterpreterEntry& rhs) const
+{
+    return this->pluginPath == rhs.pluginPath &&
+            this->scriptLanguage == rhs.scriptLanguage;
 }
 
 } // namespace ScriptEmbedderNS

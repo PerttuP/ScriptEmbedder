@@ -52,6 +52,13 @@ struct ScriptEntry
      * 0 is the highest priority.
      */
     unsigned priority;
+
+    /**
+     * @brief Comparison for equality is impemented for convenience.
+     * @param rhs Compared object.
+     * @return True if objects are equal (identical attributes).
+     */
+    bool operator==(const ScriptEntry& rhs) const;
 };
 
 
@@ -63,13 +70,19 @@ struct InterpreterEntry
     /**
      * @brief Name of interpreted language.
      */
-    QString ScriptLanguage;
+    QString scriptLanguage;
 
     /**
      * @brief Path to interpreter's plugin binary file.
      */
     QString pluginPath;
 
+    /**
+     * @brief Comparison for equality is impemented for convenience.
+     * @param rhs Compared object.
+     * @return True if objects are equal (identical attributes).
+     */
+    bool operator==(const InterpreterEntry& rhs) const;
 };
 
 
