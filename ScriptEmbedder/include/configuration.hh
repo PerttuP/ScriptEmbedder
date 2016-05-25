@@ -188,7 +188,7 @@ public:
      * 2) There is at liest one interpreter set.
      * 3) Each script has a suitable interpreter set (languages match).
      * 4) All script paths point to an existing file.
-     * 5) All plugin paths point to an existing library file.
+     * 5) All plugin paths has an appropriate postfix. Existence is not checked at this point.
      * No other validation is made at this point.
      * @return True, if configuration is valid.
      * @pre -

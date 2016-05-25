@@ -6,7 +6,7 @@
  */
 
 #include "configuration.hh"
-#include <QFile>
+#include <QFileInfo>
 #include <QLibrary>
 
 namespace ScriptEmbedderNS {
@@ -114,18 +114,19 @@ QString Configuration::errorString() const
         return QString("At liest one interpreter has to be set.");
     }
     for (auto iter = scripts_.begin(); iter != scripts_.end(); ++iter) {
-        if (!QFile::exists(iter->second.scriptPath)){
+        if (!QFileInfo::exists(iter->second.scriptPath)){
             return QString("Path (%1) for script(id=%2) is invalid.")
                     .arg(iter->second.scriptPath).arg(iter->second.id);
         }
         if (interpreters_.find(iter->second.scriptLanguage) == interpreters_.end()) {
-            return QString("No suitable interpreter for script(id=%1 language='%2').")
-                    .arg(iter->second.id).arg(iter->second.scriptLanguage);
+            return QString("No suitable interpreter for '%1' required by script(id=%2).")
+                    .arg(iter->second.scriptLanguage).arg(iter->second.id);
         }
     }
     for (auto iter = interpreters_.begin(); iter != interpreters_.end(); ++iter) {
-        if (!QLibrary::isLibrary(iter->second.pluginPath))
-            return QString("Plugin does not exist: '%1'").arg(iter->second.pluginPath);
+        if (!QLibrary::isLibrary(iter->second.pluginPath)) {
+            return QString("Invalid interpreter plugin path: '%1'.").arg(iter->second.pluginPath);
+        }
     }
 
     Q_ASSERT(false);  // This should never be executed.

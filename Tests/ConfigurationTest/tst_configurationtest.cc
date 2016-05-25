@@ -232,11 +232,81 @@ void ConfigurationTest::constructorAndIsValidTest_data()
     QTest::addColumn<bool>("isValid");
     QTest::addColumn<QString>("errorString");
 
-    QTest::newRow("defaults") << std::shared_ptr<ScriptEmbedderNS::ScriptAPI>(nullptr)
-                              << InterpreterMap()
-                              << ScriptMap()
-                              << false
-                              << QString("ScriptAPI has not been set.");
+    using namespace ScriptEmbedderNS;
+
+#ifdef Q_OS_WIN
+    const QString TEST_PATH = "../../../ScriptEmbedder/Tests/ConfigurationTest/testfiles/";
+    const QString LIB_POSTFIX = ".dll";
+#else
+    const QString TEST_PATH = "../../../ScriptEmbedder/Tests/ConfigurationTest/testfiles/";
+    const QString LIB_POSTFIX = ".so";
+#endif
+
+    QTest::newRow("valid")
+            << std::shared_ptr<ScriptAPI>(new ScriptAPI())
+            << InterpreterMap {
+                    {"Python", InterpreterEntry{"Python", TEST_PATH+"notAnActualPlugin1"+LIB_POSTFIX}}
+                }
+            << ScriptMap {
+                    {0u, ScriptEntry {0u, TEST_PATH+"notAPythonScript1.py", "Python", false, 0u}}
+                }
+            << true
+            << QString();
+
+    QTest::newRow("scriptfile not found")
+            << std::shared_ptr<ScriptAPI>(new ScriptAPI())
+            << InterpreterMap {
+                    {"Python", InterpreterEntry{"Python", TEST_PATH+"notAnActualPlugin1"+LIB_POSTFIX}}
+                }
+            << ScriptMap {
+                    {0u, ScriptEntry {0u, TEST_PATH+"does_not_exist.py", "Python", false, 0u}}
+                }
+            << false
+            << QString("Path (%1) for script(id=%2) is invalid.").arg(TEST_PATH+"does_not_exist.py").arg(0u);
+
+    QTest::newRow("no interpreters")
+            << std::shared_ptr<ScriptAPI>(new ScriptAPI())
+            << InterpreterMap ()
+            << ScriptMap {
+                    {0u, ScriptEntry {0u, TEST_PATH+"does_not_exist.py", "Python", false, 0u}}
+                }
+            << false
+            << QString("At liest one interpreter has to be set.");
+
+    QTest::newRow("no suitable interpreter")
+            << std::shared_ptr<ScriptAPI>(new ScriptAPI())
+            << InterpreterMap {
+                    {"Python", InterpreterEntry{"Python", TEST_PATH+"notAnActualPlugin1"+LIB_POSTFIX}}
+                }
+            << ScriptMap {
+                    {0u, ScriptEntry {0u, TEST_PATH+"notAPythonScript1.py", "Python", false, 0u}},
+                    {1u, ScriptEntry {1u, TEST_PATH+"notJS.js", "JavaScript", true, 3u}}
+                }
+            << false
+            << QString("No suitable interpreter for '%1' required by script(id=%2).").arg("JavaScript").arg(1u);
+
+    QTest::newRow("Invalid plugin postfix")
+            << std::shared_ptr<ScriptAPI>(new ScriptAPI())
+            << InterpreterMap {
+                    {"Python", InterpreterEntry{"Python", TEST_PATH+"notAnActualPlugin1"+".txt"}}
+                }
+            << ScriptMap {
+                    {0u, ScriptEntry {0u, TEST_PATH+"notAPythonScript1.py", "Python", false, 0u}}
+                }
+            << false
+            << QString("Invalid interpreter plugin path: '%1'.").arg(TEST_PATH+"notAnActualPlugin1.txt");
+
+
+    QTest::newRow("no api")
+            << std::shared_ptr<ScriptAPI>(nullptr)
+            << InterpreterMap {
+                    {"Python", InterpreterEntry{"Python", TEST_PATH+"notAnActualPlugin1"+LIB_POSTFIX}}
+                }
+            << ScriptMap {
+                    {0u, ScriptEntry {0u, TEST_PATH+"notAPythonScript1.py", "Python", false, 0u}}
+                }
+            << false
+            << QString("ScriptAPI has not been set.");
 }
 
 
