@@ -11,7 +11,9 @@ INCLUDEPATH += include
 
 HEADERS += \
     include/configuration.hh \
-    include/scriptapi.hh
+    include/scriptapi.hh \
+    include/scriptembedder.hh \
+    include/logger.hh
 
 SOURCES += \
     src/configuration.cc
