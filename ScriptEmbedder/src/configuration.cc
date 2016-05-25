@@ -46,6 +46,12 @@ void Configuration::addInterpreter(const InterpreterEntry& interpreter)
 }
 
 
+void Configuration::removeInterpreter(const QString& lang)
+{
+    interpreters_.erase(lang);
+}
+
+
 std::map<QString, InterpreterEntry> Configuration::interpreters() const
 {
     return interpreters_;
@@ -55,6 +61,12 @@ std::map<QString, InterpreterEntry> Configuration::interpreters() const
 void Configuration::addScript(const ScriptEntry& script)
 {
     scripts_[script.id] = script;
+}
+
+
+void Configuration::removeScript(unsigned id)
+{
+    scripts_.erase(id);
 }
 
 

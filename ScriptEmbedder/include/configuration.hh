@@ -143,6 +143,15 @@ public:
     void addInterpreter(const InterpreterEntry& interpreter);
 
     /**
+     * @brief Remove interpreter for given language.
+     * @param lang Language to be removed.
+     * @pre -
+     * @post Interpreter has been removed.
+     * If no such interpreter exist, does nothing.
+     */
+    void removeInterpreter(const QString& lang);
+
+    /**
      * @brief Get currently assigned interpreters.
      * @return Current interpreters in map. Script language is the key.
      * @pre -
@@ -156,6 +165,14 @@ public:
      * @post If an entry with same id already exists, it will be replaced.
      */
     void addScript(const ScriptEntry& script);
+
+    /**
+     * @brief Remove script having given id.
+     * @param id Id of script to be removed.
+     * @pre -
+     * @post Script has been removed. If no such script exists, does nothing.
+     */
+    void removeScript(unsigned id);
 
     /**
      * @brief Get assigned scripts.
