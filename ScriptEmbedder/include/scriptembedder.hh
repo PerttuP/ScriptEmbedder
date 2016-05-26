@@ -49,7 +49,7 @@ public:
      * @return Current configuration.
      * @pre -
      */
-    Configuration configuration() const = 0;
+    virtual Configuration configuration() const = 0;
 
     /**
      * @brief Check if ScriptEmbedder is in a valid state.

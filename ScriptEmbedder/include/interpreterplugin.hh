@@ -15,7 +15,7 @@
 // (Required for using QPluginLoader).
 #define INTERPRETER_PLUGIN_IID "PerttuP.ScriptEmbedder.InterpreterPlugin"
 
-namespace ScriptEmbeddetNS
+namespace ScriptEmbedderNS
 {
 
 /**
@@ -94,7 +94,7 @@ public:
 
 // Introduce interface to Qt Meta Object Compiler
 // (Required to use QPluginLoader).
-Q_DECLARE_INTERFACE(ScriptEmbeddetNS::InterpreterPlugin, INTERPRETER_PLUGIN_IID)
+Q_DECLARE_INTERFACE(ScriptEmbedderNS::InterpreterPlugin, INTERPRETER_PLUGIN_IID)
 
 #endif // INTERPRETERPLUGIN_HH
 

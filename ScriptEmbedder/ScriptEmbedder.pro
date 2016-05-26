@@ -14,7 +14,9 @@ HEADERS += \
     include/scriptapi.hh \
     include/scriptembedder.hh \
     include/logger.hh \
-    include/interpreterplugin.hh
+    include/interpreterplugin.hh \
+    src/serialscriptembedder.hh
 
 SOURCES += \
-    src/configuration.cc
+    src/configuration.cc \
+    src/serialscriptembedder.cc
