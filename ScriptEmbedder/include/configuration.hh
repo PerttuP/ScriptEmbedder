@@ -54,6 +54,28 @@ struct ScriptEntry
     unsigned priority;
 
     /**
+     * @brief Constructor. Sets default values for fields:
+     * id = 0, scriptPath = "", scriptLanguage = "", readToRAM = false, priority = 0.
+     */
+    ScriptEntry();
+
+    /**
+     * @brief Constructor. Set given parametes for fields.
+     * @param id Script's unique id number.
+     * @param path Path to script's source code file.
+     * @param language Script's language.
+     * @param toRAM Is script read to RAM at configuration.
+     * @param priority Script' priority (has effect only in asynchronous mode).
+     * @pre Path and language are not empty strings.
+     * @post New entry has given values as its attributes.
+     */
+    ScriptEntry(unsigned scriptId,
+                const QString& path,
+                const QString& language,
+                bool toRAM = false,
+                unsigned priority = 0);
+
+    /**
      * @brief Comparison for equality is impemented for convenience.
      * @param rhs Compared object.
      * @return True if objects are equal (identical attributes).
@@ -76,6 +98,21 @@ struct InterpreterEntry
      * @brief Path to interpreter's plugin binary file.
      */
     QString pluginPath;
+
+    /**
+     * @brief Costructor. Sets default values for fields:
+     * scriptLanguage = "", pluginPath = "".
+     *
+     */
+    InterpreterEntry();
+
+    /**
+     * @brief Constructor. Set given values for attributes.
+     * @param language Supported scripting language.
+     * @param path Path to interpreter plugin library file.
+     * @pre Language and path are non-empty strings.
+     */
+    InterpreterEntry(const QString& language, const QString& path);
 
     /**
      * @brief Comparison for equality is impemented for convenience.
@@ -152,6 +189,23 @@ public:
     void removeInterpreter(const QString& lang);
 
     /**
+     * @brief Check if there is an interpreter for given language set.
+     * @param language Interpreted language.
+     * @return True, if such interpreter exists.
+     * @pre -
+     */
+    bool hasInterpreter(const QString& language) const;
+
+    /**
+     * @brief Get interpreter information for given language.
+     * @param language Interpreted language.
+     * @return Designated interpreter for given language. If no such
+     * interpreter exists, returns default-constructed InterpreterEntry.
+     * @pre -
+     */
+    InterpreterEntry getInterpteter(const QString& language) const;
+
+    /**
      * @brief Get currently assigned interpreters.
      * @return Current interpreters in map. Script language is the key.
      * @pre -
@@ -173,6 +227,23 @@ public:
      * @post Script has been removed. If no such script exists, does nothing.
      */
     void removeScript(unsigned id);
+
+    /**
+     * @brief Check if script with given id exists.
+     * @param id Id number of the script.
+     * @return True, if script does exist.
+     * @pre -
+     */
+    bool hasScript(unsigned id) const;
+
+    /**
+     * @brief Get script entry wit given id.
+     * @param id Id number of the script.
+     * @return Script matching the id. If no such id exists, returns default
+     * ScriptEntry (id=0, path="", language="", readToRam=false, priority=0).
+     * @pre -
+     */
+    ScriptEntry getScript(unsigned id) const;
 
     /**
      * @brief Get assigned scripts.

@@ -45,6 +45,16 @@ public:
 private Q_SLOTS:
 
     /**
+     * @brief Test ScriptEntry constructor.
+     */
+    void scriptEntryConstructorTest();
+
+    /**
+     * @brief Test InterpreterEntry constructor.
+     */
+    void interpreterEntryConstructorTest();
+
+    /**
      * @brief Test equality comparison for InterpreterEntry.
      */
     void interpreterComparisonTest();
@@ -74,18 +84,39 @@ private Q_SLOTS:
     void apiSetterGetterTest();
 
     /**
-     * @brief Test the addInterpreter method.
+     * @brief Test the addInterpreter, removeInterpreter, getInterpreter,
+     * interpreters and hasInterpreter methods.
      */
-    void addRemoveInterpreterTest();
+    void interpreterTest();
 
     /**
-     * @brief Test the addScript method.
+     * @brief Test the addScript, removeScript, getScript, scripts
+     * and hasScript methods.
      */
-    void addRemoveScriptTest();
+    void scriptTest();
 };
 
 ConfigurationTest::ConfigurationTest()
 {
+}
+
+
+void ConfigurationTest::scriptEntryConstructorTest()
+{
+    ScriptEmbedderNS::ScriptEntry entry;
+    QCOMPARE(entry.id, 0u);
+    QCOMPARE(entry.scriptPath, QString());
+    QCOMPARE(entry.scriptLanguage, QString());
+    QCOMPARE(entry.readToRAM, false);
+    QCOMPARE(entry.priority, 0u);
+}
+
+
+void ConfigurationTest::interpreterEntryConstructorTest()
+{
+    ScriptEmbedderNS::InterpreterEntry entry;
+    QCOMPARE(entry.scriptLanguage, QString());
+    QCOMPARE(entry.pluginPath, QString());
 }
 
 
@@ -326,7 +357,7 @@ void ConfigurationTest::apiSetterGetterTest()
 }
 
 
-void ConfigurationTest::addRemoveInterpreterTest()
+void ConfigurationTest::interpreterTest()
 {
     using namespace ScriptEmbedderNS;
     Configuration c;
@@ -338,35 +369,53 @@ void ConfigurationTest::addRemoveInterpreterTest()
     c.addInterpreter(i1);
     QCOMPARE(c.interpreters().size(), InterpreterMap::size_type(1));
     QCOMPARE(c.interpreters().at("Python"), i1);
+    QCOMPARE(c.getInterpteter("Python"), i1);
+    QVERIFY(c.hasInterpreter("Python"));
     c.addInterpreter(i2);
     QCOMPARE(c.interpreters().size(), InterpreterMap::size_type(2));
     QCOMPARE(c.interpreters().at("Python"), i1);
+    QCOMPARE(c.getInterpteter("Python"), i1);
+    QVERIFY(c.hasInterpreter("Python"));
     QCOMPARE(c.interpreters().at("JavaScript"), i2);
+    QCOMPARE(c.getInterpteter("JavaScript"), i2);
+    QVERIFY(c.hasInterpreter("JavaScript"));
 
     // Replace existing interpreter
     InterpreterEntry i3 {"Python", "scriptpath/betterpythonplugin"};
     c.addInterpreter(i3);
     QCOMPARE(c.interpreters().size(), InterpreterMap::size_type(2));
     QCOMPARE(c.interpreters().at("Python"), i3);
+    QCOMPARE(c.getInterpteter("Python"), i3);
+    QVERIFY(c.hasInterpreter("Python"));
     QCOMPARE(c.interpreters().at("JavaScript"), i2);
+    QCOMPARE(c.getInterpteter("JavaScript"), i2);
+    QVERIFY(c.hasInterpreter("JavaScript"));
 
     // Remove interpreter.
     c.removeInterpreter("Python");
     InterpreterMap interpreters = c.interpreters();
     QCOMPARE(interpreters.size(), InterpreterMap::size_type(1));
     QVERIFY(interpreters.find("Python") == interpreters.end() );
+    QCOMPARE(c.getInterpteter("Python"), InterpreterEntry());
+    QVERIFY(!c.hasInterpreter("Python"));
     QCOMPARE(interpreters.at("JavaScript"), i2);
+    QCOMPARE(c.getInterpteter("JavaScript"), i2);
+    QVERIFY(c.hasInterpreter("JavaScript"));
 
     // Remove non-existing interpreter.
     c.removeInterpreter("Python");
     interpreters = c.interpreters();
     QCOMPARE(interpreters.size(), InterpreterMap::size_type(1));
     QVERIFY(interpreters.find("Python") == interpreters.end() );
+    QCOMPARE(c.getInterpteter("Python"), InterpreterEntry());
+    QVERIFY(!c.hasInterpreter("Python"));
     QCOMPARE(interpreters.at("JavaScript"), i2);
+    QCOMPARE(c.getInterpteter("JavaScript"), i2);
+    QVERIFY(c.hasInterpreter("JavaScript"));
 }
 
 
-void ConfigurationTest::addRemoveScriptTest()
+void ConfigurationTest::scriptTest()
 {
     using namespace ScriptEmbedderNS;
     Configuration c;
@@ -378,31 +427,49 @@ void ConfigurationTest::addRemoveScriptTest()
     c.addScript(s1);
     QCOMPARE(c.scripts().size(), ScriptMap::size_type(1));
     QCOMPARE(c.scripts().at(0u), s1);
+    QVERIFY(c.hasScript(s1.id));
+    QCOMPARE(c.getScript(s1.id), s1);
     c.addScript(s2);
     QCOMPARE(c.scripts().size(), ScriptMap::size_type(2));
     QCOMPARE(c.scripts().at(0u), s1);
+    QVERIFY(c.hasScript(s1.id));
+    QCOMPARE(c.getScript(s1.id), s1);
     QCOMPARE(c.scripts().at(1u), s2);
+    QVERIFY(c.hasScript(s2.id));
+    QCOMPARE(c.getScript(s2.id), s2);
 
     // Replace existing script
     ScriptEntry s3 {0u, "path3", "Perl", true, 3u};
     c.addScript(s3);
     QCOMPARE(c.scripts().size(), ScriptMap::size_type(2));
     QCOMPARE(c.scripts().at(0u), s3);
+    QVERIFY(c.hasScript(s1.id));
+    QCOMPARE(c.getScript(s1.id), s3);
     QCOMPARE(c.scripts().at(1u), s2);
+    QVERIFY(c.hasScript(s2.id));
+    QCOMPARE(c.getScript(s2.id), s2);
 
     // Remove script
     c.removeScript(0u);
     ScriptMap scripts = c.scripts();
     QCOMPARE(scripts.size(), ScriptMap::size_type(1));
     QVERIFY(scripts.find(0u) == scripts.end());
+    QVERIFY(!c.hasScript(s1.id));
+    QCOMPARE(c.getScript(s1.id), ScriptEntry());
     QCOMPARE(scripts.at(1u), s2);
+    QVERIFY(c.hasScript(s2.id));
+    QCOMPARE(c.getScript(s2.id), s2);
 
     // Remove non-existing script
     c.removeScript(0u);
     scripts = c.scripts();
     QCOMPARE(scripts.size(), ScriptMap::size_type(1));
     QVERIFY(scripts.find(0u) == scripts.end());
+    QVERIFY(!c.hasScript(s3.id));
+    QCOMPARE(c.getScript(s3.id), ScriptEntry());
     QCOMPARE(scripts.at(1u), s2);
+    QVERIFY(c.hasScript(s2.id));
+    QCOMPARE(c.getScript(s2.id), s2);
 }
 
 

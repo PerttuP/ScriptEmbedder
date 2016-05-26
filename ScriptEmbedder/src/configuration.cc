@@ -52,6 +52,22 @@ void Configuration::removeInterpreter(const QString& lang)
 }
 
 
+bool Configuration::hasInterpreter(const QString& language) const
+{
+    return interpreters_.find(language) != interpreters_.end();
+}
+
+
+InterpreterEntry Configuration::getInterpteter(const QString& language) const
+{
+    auto it = interpreters_.find(language);
+    if (it == interpreters_.end()){
+        return InterpreterEntry();
+    }
+    return it->second;
+}
+
+
 std::map<QString, InterpreterEntry> Configuration::interpreters() const
 {
     return interpreters_;
@@ -67,6 +83,22 @@ void Configuration::addScript(const ScriptEntry& script)
 void Configuration::removeScript(unsigned id)
 {
     scripts_.erase(id);
+}
+
+
+bool Configuration::hasScript(unsigned id) const
+{
+    return scripts_.find(id) != scripts_.end();
+}
+
+
+ScriptEntry Configuration::getScript(unsigned id) const
+{
+    auto it = scripts_.find(id);
+    if (it == scripts_.end()){
+        return ScriptEntry();
+    }
+    return it->second;
 }
 
 
@@ -134,6 +166,26 @@ QString Configuration::errorString() const
 }
 
 
+ScriptEntry::ScriptEntry() :
+    id(0), scriptPath(), scriptLanguage(), readToRAM(false), priority(0)
+{
+}
+
+
+ScriptEntry::ScriptEntry(unsigned scriptId,
+                         const QString& path,
+                         const QString& language,
+                         bool toRAM,
+                         unsigned priority) :
+
+    id(scriptId), scriptPath(path), scriptLanguage(language),
+    readToRAM(toRAM), priority(priority)
+{
+    Q_ASSERT(!path.isEmpty());
+    Q_ASSERT(!language.isEmpty());
+}
+
+
 bool ScriptEntry::operator==(const ScriptEntry& rhs) const
 {
     return this->id == rhs.id &&
@@ -141,6 +193,20 @@ bool ScriptEntry::operator==(const ScriptEntry& rhs) const
             this->scriptPath == rhs.scriptPath &&
             this->readToRAM == rhs.readToRAM &&
             this->priority == rhs.priority;
+}
+
+
+InterpreterEntry::InterpreterEntry() :
+    scriptLanguage(), pluginPath()
+{
+}
+
+
+InterpreterEntry::InterpreterEntry(const QString& language, const QString& path) :
+    scriptLanguage(language), pluginPath(path)
+{
+    Q_ASSERT(!language.isEmpty());
+    Q_ASSERT(!path.isEmpty());
 }
 
 
