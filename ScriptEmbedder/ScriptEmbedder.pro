@@ -13,7 +13,8 @@ HEADERS += \
     include/configuration.hh \
     include/scriptapi.hh \
     include/scriptembedder.hh \
-    include/logger.hh
+    include/logger.hh \
+    include/interpreterplugin.hh
 
 SOURCES += \
     src/configuration.cc

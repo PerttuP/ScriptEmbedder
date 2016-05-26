@@ -103,20 +103,38 @@ ConfigurationTest::ConfigurationTest()
 
 void ConfigurationTest::scriptEntryConstructorTest()
 {
-    ScriptEmbedderNS::ScriptEntry entry;
-    QCOMPARE(entry.id, 0u);
-    QCOMPARE(entry.scriptPath, QString());
-    QCOMPARE(entry.scriptLanguage, QString());
-    QCOMPARE(entry.readToRAM, false);
-    QCOMPARE(entry.priority, 0u);
+    ScriptEmbedderNS::ScriptEntry entry1;
+    QCOMPARE(entry1.id, 0u);
+    QCOMPARE(entry1.scriptPath, QString());
+    QCOMPARE(entry1.scriptLanguage, QString());
+    QCOMPARE(entry1.readToRAM, false);
+    QCOMPARE(entry1.priority, 0u);
+
+    ScriptEmbedderNS::ScriptEntry entry2(10u, "testScript.py", "Python", true, 1u);
+    QCOMPARE(entry2.id, 10u);
+    QCOMPARE(entry2.scriptPath, QString("testScript.py"));
+    QCOMPARE(entry2.scriptLanguage, QString("Python"));
+    QCOMPARE(entry2.readToRAM, true);
+    QCOMPARE(entry2.priority, 1u);
+
+    ScriptEmbedderNS::ScriptEntry entry3(10u, "testScript.py", "Python");
+    QCOMPARE(entry3.id, 10u);
+    QCOMPARE(entry3.scriptPath, QString("testScript.py"));
+    QCOMPARE(entry3.scriptLanguage, QString("Python"));
+    QCOMPARE(entry3.readToRAM, false);
+    QCOMPARE(entry3.priority, 0u);
 }
 
 
 void ConfigurationTest::interpreterEntryConstructorTest()
 {
-    ScriptEmbedderNS::InterpreterEntry entry;
-    QCOMPARE(entry.scriptLanguage, QString());
-    QCOMPARE(entry.pluginPath, QString());
+    ScriptEmbedderNS::InterpreterEntry entry1;
+    QCOMPARE(entry1.scriptLanguage, QString());
+    QCOMPARE(entry1.pluginPath, QString());
+
+    ScriptEmbedderNS::InterpreterEntry entry2("Python", "testInterpreter.dll");
+    QCOMPARE(entry2.scriptLanguage, QString("Python"));
+    QCOMPARE(entry2.pluginPath, QString("testInterpreter.dll"));
 }
 
 
