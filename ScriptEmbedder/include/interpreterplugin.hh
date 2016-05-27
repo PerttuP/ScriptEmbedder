@@ -61,7 +61,7 @@ public:
     /**
      * @brief Mandatory virtual destructor.
      */
-    virtual ~InterpreterPlugin();
+    virtual ~InterpreterPlugin() {}
 
     /**
      * @brief Set the ScriptAPI object for the interpreter.
