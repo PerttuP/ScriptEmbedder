@@ -44,19 +44,6 @@ public:
     void removeScript(unsigned scriptId);
     bool addInterpreter(const InterpreterEntry& interpreter);
     void setLogger(Logger* logger);
-
-
-private:
-
-    Configuration conf_;
-    Logger* logger_;
-    std::map<QString, std::shared_ptr<InterpreterPlugin> > interpreters_;
-    bool valid_;
-    QString errorStr_;
-    std::map<unsigned, QString> scriptsInRAM_;
-
-    std::shared_ptr<InterpreterPlugin> loadPlugin(const InterpreterEntry& conf);
-    QString readScript(const QString& fileName);
 };
 
 } // namespace ScriptEmbedderNS

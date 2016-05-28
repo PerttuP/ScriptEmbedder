@@ -46,7 +46,7 @@ public:
      * The returned object is deleted when this object is destroyed or
      * unloadPlugin() is called explicitly.
      */
-    InterpreterPlugin* loadPlugin();
+    InterpreterPlugin* instance();
 
     /**
      * @brief Unloads plugin previously loaded by this InterpreterLoader.

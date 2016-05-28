@@ -3,6 +3,8 @@ CONFIG += ordered
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    InterpreterPluginStub
+    InterpreterPluginStub \
+    DifferentPlugin \
+    InterpreterLoaderTest \
 
 

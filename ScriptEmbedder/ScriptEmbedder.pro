@@ -16,7 +16,8 @@ HEADERS += \
     include/logger.hh \
     include/interpreterplugin.hh \
     src/serialscriptembedder.hh \
-    src/interpreterloader.hh
+    src/interpreterloader.hh \
+    include/scriptinterpreter.hh
 
 SOURCES += \
     src/configuration.cc \

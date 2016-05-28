@@ -20,7 +20,7 @@ InterpreterLoader::~InterpreterLoader()
 }
 
 
-InterpreterPlugin* InterpreterLoader::loadPlugin()
+InterpreterPlugin* InterpreterLoader::instance()
 {
     QObject* plugin = loader_.instance();
 
@@ -42,7 +42,7 @@ InterpreterPlugin* InterpreterLoader::loadPlugin()
 
     // Check that interpreter is for desired language.
     if (interpreter->language() != entry_.scriptLanguage) {
-        errorStr_ = QString("Plugin '%1' is not for desired language '%2'")
+        errorStr_ = QString("Plugin '%1' is not for desired language '%2'.")
                 .arg(entry_.pluginPath).arg(entry_.scriptLanguage);
         this->unloadPlugin();
         return nullptr;

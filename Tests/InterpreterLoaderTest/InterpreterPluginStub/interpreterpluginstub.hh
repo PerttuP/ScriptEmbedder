@@ -31,20 +31,16 @@ public:
     virtual ~InterpreterPluginStub();
 
     /**
-     * @brief Empty implementation (not needed in InterpreterLoaderTests).
-     */
-    void SetScriptAPI(std::shared_ptr<ScriptEmbedderNS::ScriptAPI> api);
-
-    /**
-     * brief Empty implementation (not needed in InterpreterLoaderTests).
-     */
-    ScriptRunResult runScript(const QString& script, const QStringList& params);
-
-    /**
      * @brief Stub implementation for the InterpreterPlugin interface
      * @return 'TestLanguage'.
      */
     QString language() const;
+
+    /**
+     * @brief Stub implementation.
+     * @return nullptr.
+     */
+    ScriptEmbedderNS::ScriptInterpreter* getInstance() const;
 };
 
 #endif // INTERPRETERPLUGINSTUB_HH

@@ -17,22 +17,13 @@ InterpreterPluginStub::~InterpreterPluginStub()
 
 }
 
-void InterpreterPluginStub::SetScriptAPI(std::shared_ptr<ScriptEmbedderNS::ScriptAPI> api)
-{
-    Q_UNUSED(api);
-}
-
-
-ScriptEmbedderNS::InterpreterPlugin::ScriptRunResult
-InterpreterPluginStub::runScript(const QString& script, const QStringList& params)
-{
-    Q_UNUSED(script);
-    Q_UNUSED(params);
-    return ScriptRunResult();
-}
-
 QString InterpreterPluginStub::language() const
 {
     return QString("TestLanguage");
+}
+
+ScriptEmbedderNS::ScriptInterpreter*InterpreterPluginStub::getInstance() const
+{
+    return nullptr;
 }
 
