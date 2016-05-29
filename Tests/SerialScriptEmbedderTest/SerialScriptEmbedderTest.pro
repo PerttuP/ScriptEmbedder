@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
+CONFIG += ordered
+
 SUBDIRS += \
-    ConfigurationTest \
-    InterpreterLoaderTest \
+    InterpreterTestPlugin \
     SerialScriptEmbedderTest

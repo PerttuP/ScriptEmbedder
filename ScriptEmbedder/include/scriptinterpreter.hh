@@ -2,6 +2,7 @@
 #define SCRIPTINTERPRETER
 
 #include <QString>
+#include <QStringList>
 #include <memory>
 #include "scriptapi.hh"
 
