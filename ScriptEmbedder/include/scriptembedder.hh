@@ -40,7 +40,7 @@ public:
      * @pre conf is valid.
      * @post ScriptEmbedder starts working according to the new configuration.
      * If setting configuration failed, error message is available in errorString().
-     * If setting configuration fails, original configuration remains.
+     * If setting configuration fails, embedder becomes invalid.
      */
     virtual bool reset(const Configuration& conf) = 0;
 
@@ -90,7 +90,7 @@ public:
      * or suitable interpreter has not been set, script is not added
      * and method returns false. In case of error, error message can be found
      * in errorString(). If there already exists a script with same id, it is
-     * replaced.
+     * replaced. Logger is notified.
      */
     virtual bool addScript(const ScriptEntry& script) = 0;
 
@@ -98,7 +98,7 @@ public:
      * @brief Remove script from current configuration.
      * @param scriptId Id of script to be removed.
      * @pre -
-     * @post Script is removed from configuration.
+     * @post Script is removed from configuration. Logger is notified.
      */
     virtual void removeScript(unsigned scriptId) = 0;
 

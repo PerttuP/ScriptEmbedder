@@ -10,6 +10,7 @@
 
 #include "scriptembedder.hh"
 #include "interpreterplugin.hh"
+#include "interpreterloader.hh"
 
 namespace ScriptEmbedderNS
 {
@@ -44,6 +45,22 @@ public:
     void removeScript(unsigned scriptId);
     bool addInterpreter(const InterpreterEntry& interpreter);
     void setLogger(Logger* logger);
+
+
+private:
+
+    Configuration conf_;
+    Logger* logger_;
+    bool valid_;
+    QString errorStr_;
+    std::map<QString, std::shared_ptr<InterpreterLoader>> loaders_;
+    std::map<QString, std::shared_ptr<ScriptInterpreter>> interpreters_;
+    std::map<unsigned, QString> scripts_;
+
+    void logMsg(const QString& msg);
+    QString readScript(const QString& path);
+    bool refreshPlugins();
+    void clearConfiguration();
 };
 
 } // namespace ScriptEmbedderNS

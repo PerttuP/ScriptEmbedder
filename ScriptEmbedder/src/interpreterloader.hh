@@ -62,6 +62,12 @@ public:
      */
     QString errorString() const;
 
+    /**
+     * @brief Get loader's InterpreterEntry.
+     * @return InterpreterEntry given in constructor.
+     */
+    InterpreterEntry getInterpreterEntry() const;
+
 
 private:
 

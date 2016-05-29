@@ -63,4 +63,10 @@ QString InterpreterLoader::errorString() const
     return errorStr_;
 }
 
+
+InterpreterEntry InterpreterLoader::getInterpreterEntry() const
+{
+    return entry_;
+}
+
 } // namespace ScriptEmbedderNS
