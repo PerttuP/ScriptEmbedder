@@ -32,3 +32,9 @@ Makefile*
 #QtCtreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
+
+Tests/ConfigurationTest/debug/*
+Tests/ConfigurationTest/release/*
+Tests/InterpreterLoaderTest/InterpreterLoaderTest/debug/*
+Tests/InterpreterLoaderTest/InterpreterLoaderTest/release/*
+

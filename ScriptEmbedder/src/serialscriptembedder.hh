@@ -35,6 +35,11 @@ public:
      */
     SerialScriptEmbedder(const Configuration& conf);
 
+    /**
+     * @brief Destructor. Unloads all current plugins.
+     */
+    virtual ~SerialScriptEmbedder();
+
     // ScriptEmbedder interface
     bool reset(const Configuration& conf);
     Configuration configuration() const;
@@ -59,7 +64,7 @@ private:
 
     void logMsg(const QString& msg);
     QString readScript(const QString& path);
-    bool refreshPlugins();
+    bool loadPlugins();
     void clearConfiguration();
 };
 

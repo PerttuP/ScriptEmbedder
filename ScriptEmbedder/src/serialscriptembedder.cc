@@ -1,4 +1,5 @@
 #include "serialscriptembedder.hh"
+#include <set>
 #include <QFileInfo>
 #include <QPluginLoader>
 
@@ -15,13 +16,19 @@ SerialScriptEmbedder::SerialScriptEmbedder(const Configuration& conf) :
 }
 
 
+SerialScriptEmbedder::~SerialScriptEmbedder()
+{
+    this->clearConfiguration();
+}
+
+
 bool SerialScriptEmbedder::reset(const Configuration& conf)
 {
     this->clearConfiguration();
     conf_ = conf;
 
     // Update plugins.
-    if (!this->refreshPlugins()) {
+    if (!this->loadPlugins()) {
         errorStr_ = "Configuration failed: " + errorStr_;
         logMsg(errorString());
         this->clearConfiguration();
@@ -29,13 +36,13 @@ bool SerialScriptEmbedder::reset(const Configuration& conf)
     }
 
     // Update scripts.
-    std::map<unsigned, ScriptEntry> entries = conf_.scripts();
+    std::map<unsigned, ScriptEntry> entries = conf.scripts();
     for (auto it = entries.begin(); it != entries.end(); ++it) {
         if (it->second.readToRAM) {
-            scripts_[it->first] = this->readScript(it->second.scriptLanguage);
+            scripts_[it->first] = this->readScript(it->second.scriptPath);
             if (scripts_[it->first].isEmpty()){
                 errorStr_ = QString("Configuration failed: source file '%1' "
-                                    "for script '%2' does not open or is empty")
+                                    "for script '%2' does not open or is empty.")
                         .arg(it->second.scriptPath).arg(it->second.id);
                 logMsg(errorString());
                 this->clearConfiguration();
@@ -93,7 +100,7 @@ void SerialScriptEmbedder::execute(unsigned scriptId, const QStringList& params)
         scriptStr = this->readScript(scriptEntry.scriptPath);
         if (scriptStr.isEmpty()) {
             if (logger_ != nullptr) {
-                logger_->scriptFailed(scriptEntry, params, "File does not open or is empty");
+                logger_->scriptFailed(scriptEntry, params, "File does not open or is empty.");
                 return;
             }
         }
@@ -242,33 +249,26 @@ QString SerialScriptEmbedder::readScript(const QString& path)
 }
 
 
-bool SerialScriptEmbedder::refreshPlugins()
+bool SerialScriptEmbedder::loadPlugins()
 {
-    for (auto it=loaders_.begin(); it!=loaders_.end(); ++it) {
-        InterpreterEntry entry = it->second->getInterpreterEntry();
-        if (!conf_.hasInterpreter(it->first)) {
-            // Remove old plugin.
-            it->second->unloadPlugin();
-            interpreters_.erase(it->first);
-            loaders_.erase(it);
-        }
-        else if (conf_.getInterpteter(it->first) == entry){
-            // Plugin is already loaded.
-            continue;
-        }
+    std::map<QString, InterpreterEntry> entries = conf_.interpreters();
 
-        // Add plugin.
-        loaders_[entry.scriptLanguage] =
-                std::shared_ptr<InterpreterLoader>(new InterpreterLoader(entry));
+    for (auto it = entries.begin(); it != entries.end(); ++it){
+        loaders_[it->first] = std::shared_ptr<InterpreterLoader>(new InterpreterLoader(it->second));
+        InterpreterPlugin* plugin = loaders_[it->first]->instance();
 
-        std::shared_ptr<ScriptInterpreter>
-                interpreter(loaders_[entry.scriptLanguage]->instance()->getInstance());
-
-        if (interpreter == nullptr){
-            errorStr_ = loaders_[entry.scriptLanguage]->errorString();
+        if (plugin == nullptr){
+            errorStr_ = loaders_[it->first]->errorString();
             return false;
         }
-        interpreters_[entry.scriptLanguage] = interpreter;
+
+        std::shared_ptr<ScriptInterpreter> interpreter(plugin->getInstance());
+        if (interpreter == nullptr){
+            errorStr_ = loaders_[it->first]->errorString();
+            return false;
+        }
+
+        interpreters_[it->first] = interpreter;
     }
 
     return true;
