@@ -83,7 +83,8 @@ void SerialScriptEmbedder::execute(unsigned scriptId, const QStringList& params)
     if (scriptEntry == ScriptEntry()) {
         if (logger_ != nullptr){
             scriptEntry.id = scriptId;
-            logger_->scriptFailed(scriptEntry, params, "Script does not exist.");
+            logger_->scriptFailed(scriptEntry, params,
+                                  QString("Script '%1' does not exist.").arg(scriptId));
             return;
         }
     }
@@ -100,7 +101,9 @@ void SerialScriptEmbedder::execute(unsigned scriptId, const QStringList& params)
         scriptStr = this->readScript(scriptEntry.scriptPath);
         if (scriptStr.isEmpty()) {
             if (logger_ != nullptr) {
-                logger_->scriptFailed(scriptEntry, params, "File does not open or is empty.");
+                logger_->scriptFailed(scriptEntry, params,
+                                      QString("File '%1' does not open or is empty.")
+                                      .arg(scriptEntry.scriptPath));
                 return;
             }
         }

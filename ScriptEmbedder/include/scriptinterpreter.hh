@@ -1,3 +1,11 @@
+/**
+ * @file
+ * @brief Defines the ScriptInterpreter interface, that is responsible for
+ * running scripts. This interface is implemented and instantiated by
+ * Interpreter plugins.
+ * @author Perttu Paarlahti 2016.
+ */
+
 #ifndef SCRIPTINTERPRETER
 #define SCRIPTINTERPRETER
 

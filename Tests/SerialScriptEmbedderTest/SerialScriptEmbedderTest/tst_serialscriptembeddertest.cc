@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief Unit tests for the SerialScriptEmbedder class, implementation dor ScriptEmbedder interface.
+ * @author Perttu Paarlahti 2016.
+ */
+
 #include <QString>
 #include <QtTest>
 #include "serialscriptembedder.hh"
@@ -17,6 +23,7 @@ const QString LIB_POSTFIX = ".so";
 #endif
 
 
+// Meta type declarations.
 typedef std::map<QString, ScriptEmbedderNS::InterpreterEntry> InterpreterMap;
 typedef std::map<unsigned, ScriptEmbedderNS::ScriptEntry> ScriptMap;
 Q_DECLARE_METATYPE(InterpreterMap)
@@ -33,6 +40,7 @@ class LoggerStub : public ScriptEmbedderNS::Logger
 {
 public:
 
+    // Members for verifying tests.
     QStringList logMessages;
     std::vector<std::tuple<ScriptEmbedderNS::ScriptEntry, QStringList, int> > successes;
     std::vector<std::tuple<ScriptEmbedderNS::ScriptEntry, QStringList, QString> > failures;
@@ -101,6 +109,12 @@ private Q_SLOTS:
      */
     void addInterpreterTest();
     void addInterpreterTest_data();
+
+    /**
+     * @brief Test the execute method.
+     */
+    void runScriptTest();
+    void runScriptTest_data();
 };
 
 
@@ -135,7 +149,7 @@ void SerialScriptEmbedderTest::constructorTest()
         for (auto it = interpreters.begin(); it != interpreters.end(); ++it){
             QPluginLoader loader(it->second.pluginPath);
             QVERIFY(loader.isLoaded());
-            QVERIFY(((InterpreterTestPlugin*)(loader.instance()))->getApi() == api);
+            QVERIFY(((InterpreterTestPlugin*)(loader.instance()))->api == api);
         }
     }
     else {
@@ -256,7 +270,7 @@ void SerialScriptEmbedderTest::resetTest()
         for (auto it = interpreters.begin(); it != interpreters.end(); ++it){
             QPluginLoader loader(it->second.pluginPath);
             QVERIFY(loader.isLoaded());
-            QVERIFY(((InterpreterTestPlugin*)(loader.instance()))->getApi() == api);
+            QVERIFY(((InterpreterTestPlugin*)(loader.instance()))->api == api);
         }
         // Old, unused plugins are unloaded
         InterpreterMap originalInterpreter = original.interpreters();
@@ -515,6 +529,83 @@ void SerialScriptEmbedderTest::addInterpreterTest_data()
             << QString("Interpreter for '%1' replaced.").arg("TestLanguage");
 }
 
+
+void SerialScriptEmbedderTest::runScriptTest()
+{
+    using namespace ScriptEmbedderNS;
+    QFETCH(ScriptMap, scripts);
+    QFETCH(unsigned, runId);
+    QFETCH(QStringList, runParams);
+    QFETCH(int, returnValue);
+    QFETCH(QString, errorStr);
+
+    // Initialize embedder
+    std::shared_ptr<ScriptAPI> api(new ScriptAPI());
+    InterpreterMap interpreters {{"TestLanguage", InterpreterEntry("TestLanguage", PLUGIN_PATH)}};
+    Configuration conf(api, interpreters, scripts);
+    SerialScriptEmbedder embedder(conf);
+    LoggerStub logger;
+    embedder.setLogger(&logger);
+
+    // Initialize plugin
+    QPluginLoader loader(PLUGIN_PATH);
+    InterpreterTestPlugin* plugin = ((InterpreterTestPlugin*)loader.instance());
+    loader.unload();
+    QVERIFY(loader.isLoaded());
+    QVERIFY(plugin->api == api);
+    plugin->result.returnValue = returnValue;
+    plugin->result.result = errorStr.isEmpty() ? ScriptInterpreter::SUCCESS : ScriptInterpreter::FAILURE;
+    plugin->result.errorString = errorStr;
+
+    // Run script and verify results.
+    embedder.execute(runId, runParams);
+    if (plugin->result.result == ScriptInterpreter::SUCCESS){
+        // Successful case.
+        QVERIFY(logger.successes.size() == 1);
+        QVERIFY(logger.failures.size() == 0);
+        QCOMPARE(std::get<0>(logger.successes.at(0)), scripts[runId]);
+        QCOMPARE(std::get<1>(logger.successes.at(0)), runParams);
+        QCOMPARE(std::get<2>(logger.successes.at(0)), returnValue);
+    }
+    else
+    {
+        // Unsuccessful case.
+        QVERIFY(logger.failures.size() == 1);
+        QVERIFY(logger.successes.size() == 0);
+        QCOMPARE(std::get<0>(logger.failures.at(0)), scripts[runId]);
+        QCOMPARE(std::get<1>(logger.failures.at(0)), runParams);
+        QCOMPARE(std::get<2>(logger.failures.at(0)), errorStr);
+    }
+
+}
+
+
+void SerialScriptEmbedderTest::runScriptTest_data()
+{
+    using namespace ScriptEmbedderNS;
+    QTest::addColumn<ScriptMap>("scripts");
+    QTest::addColumn<unsigned>("runId");
+    QTest::addColumn<QStringList>("runParams");
+    QTest::addColumn<int>("returnValue");
+    QTest::addColumn<QString>("errorStr");
+
+    QTest::newRow("success")
+            << ScriptMap {{0u, ScriptEntry(0u, "testfiles/testscript.txt", "TestLanguage", true, 1u)}}
+            << 0u << QStringList{"1", "2", "abc"} << 1 << QString();
+
+    QTest::newRow("failure")
+            << ScriptMap{{10u, ScriptEntry(10u, "testfiles/testscript.txt", "TestLanguage", false, 4u)}}
+            << 10u << QStringList{"3,14", "asd", "0"} << 0 << QString("Syntax error");
+
+    QTest::newRow("no such script")
+            << ScriptMap() << 0u << QStringList{"1", "2", "abc"} << 0
+            << QString("Script '%1' does not exist.").arg(0u);
+
+    QTest::newRow("does not open")
+            << ScriptMap{{1u, ScriptEntry(1u, "testfiles/empty.txt", "TestLanguage", false, 4u)}}
+            << 1u << QStringList{"a", "b", "124"} << 0
+            << QString("File '%1' does not open or is empty.").arg("testfiles/empty.txt");
+}
 
 
 QTEST_APPLESS_MAIN(SerialScriptEmbedderTest)

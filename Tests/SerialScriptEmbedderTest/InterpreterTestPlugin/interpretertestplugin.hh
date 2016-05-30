@@ -67,7 +67,7 @@ public:
 
     InterpreterTestPlugin() :
         QObject(), ScriptEmbedderNS::InterpreterPlugin(),
-        api_(nullptr), result_(), script_(), params_() {}
+        api(nullptr), result(), script(), params() {}
 
     virtual ~InterpreterTestPlugin() {}
 
@@ -78,36 +78,15 @@ public:
 
     ScriptEmbedderNS::ScriptInterpreter* getInstance() const
     {
-        return new TestInterpreter(api_, script_, params_, result_);
-    }
-
-    std::shared_ptr<ScriptEmbedderNS::ScriptAPI> getApi() const
-    {
-        return api_;
-    }
-
-    QString lastScript() const
-    {
-        return script_;
-    }
-
-    QStringList lastParams() const
-    {
-        return params_;
-    }
-
-    ScriptEmbedderNS::ScriptInterpreter::ScriptRunResult lastResult() const
-    {
-        return result_;
+        return new TestInterpreter(api, script, params, result);
     }
 
 
-private:
-
-    mutable std::shared_ptr<ScriptEmbedderNS::ScriptAPI> api_;
-    mutable ScriptEmbedderNS::ScriptInterpreter::ScriptRunResult result_;
-    mutable QString script_;
-    mutable QStringList params_;
+    // Members used to control and verify tests.
+    mutable std::shared_ptr<ScriptEmbedderNS::ScriptAPI> api;
+    mutable ScriptEmbedderNS::ScriptInterpreter::ScriptRunResult result;
+    mutable QString script;
+    mutable QStringList params;
 };
 
 
