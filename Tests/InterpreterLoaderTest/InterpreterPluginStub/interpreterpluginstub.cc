@@ -24,6 +24,6 @@ QString InterpreterPluginStub::language() const
 
 ScriptEmbedderNS::ScriptInterpreter*InterpreterPluginStub::getInstance() const
 {
-    return nullptr;
+    return new InterpreterStub();
 }
 

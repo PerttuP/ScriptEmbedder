@@ -6,11 +6,13 @@
 
 #ifdef Q_OS_WIN
 const QString PLUGIN_PATH = "../InterpreterTestPlugin/debug/InterpreterTestPlugin.dll";
+const QString PLUGIN_PATH2 = "../../InterpreterLoaderTest/InterpreterPluginStub/debug/InterpreterPluginStub.dll";
 const QString DIFF_PLUGIN_PATH = "../../InterpreterLoaderTest/DifferentPlugin/debug/DifferentPlugin.dll";
 const QString LIB_POSTFIX = ".dll";
 #else
 const QString PLUGIN_PATH = "../InterpreterTestPlugin/InterpreterTestPlugin.so";
-const QString DIFF_PLUGIN_PATH = "../../InterpreterLoaderTest/DifferentPlugin/DifferentPlugin.dll";
+const QString PLUGIN_PATH2 = "../../InterpreterLoaderTest/InterpreterPluginStub/InterpreterPluginStub.so";
+const QString DIFF_PLUGIN_PATH = "../../InterpreterLoaderTest/DifferentPlugin/DifferentPlugin.so";
 const QString LIB_POSTFIX = ".so";
 #endif
 
@@ -21,6 +23,8 @@ Q_DECLARE_METATYPE(InterpreterMap)
 Q_DECLARE_METATYPE(ScriptMap)
 Q_DECLARE_METATYPE(std::shared_ptr<ScriptEmbedderNS::ScriptAPI>)
 Q_DECLARE_METATYPE(ScriptEmbedderNS::ScriptEntry)
+Q_DECLARE_METATYPE(ScriptEmbedderNS::InterpreterEntry)
+
 
 /**
  * @brief Stub implementation for the Logger interface.
@@ -91,6 +95,12 @@ private Q_SLOTS:
      * @brief Test the removeScript method.
      */
     void removeScriptTest();
+
+    /**
+     * @brief Test the addInterpreter method.
+     */
+    void addInterpreterTest();
+    void addInterpreterTest_data();
 };
 
 
@@ -432,6 +442,77 @@ void SerialScriptEmbedderTest::removeScriptTest()
     QCOMPARE(logger.logMessages.at(1), QString("Could not remove script '%1': No such script.").arg(0u));
     QCOMPARE(embedder.configuration().scripts().size(), ScriptMap::size_type(1));
     QCOMPARE(embedder.configuration().scripts().at(1u), remainingScript);
+}
+
+
+void SerialScriptEmbedderTest::addInterpreterTest()
+{
+    using namespace ScriptEmbedderNS;
+    QFETCH(bool, success);
+    QFETCH(InterpreterEntry, newInterpreter);
+    QFETCH(QString, errorStr);
+    QFETCH(QString, logMsg);
+
+    // Initialize embedder.
+    Configuration conf;
+    conf.setScriptAPI(std::shared_ptr<ScriptAPI>(new ScriptAPI()));
+    conf.addInterpreter(InterpreterEntry("TestLanguage", PLUGIN_PATH));
+    SerialScriptEmbedder embedder(conf);
+    LoggerStub logger;
+    embedder.setLogger(&logger);
+
+    // Add interpreter
+    bool ok = embedder.addInterpreter(newInterpreter);
+    QVERIFY(ok == success);
+    QCOMPARE(embedder.errorString(), errorStr);
+    QCOMPARE(logger.logMessages.size(), QStringList::size_type(1));
+    QCOMPARE(logger.logMessages.at(0), logMsg);
+    if (success){
+        QCOMPARE(embedder.configuration().interpreters().at(newInterpreter.scriptLanguage), newInterpreter);
+    }
+    else {
+        InterpreterMap interpreters = embedder.configuration().interpreters();
+        InterpreterMap originals = conf.interpreters();
+        QCOMPARE(interpreters.find(newInterpreter.scriptLanguage) != interpreters.end(),
+                 originals.find(newInterpreter.scriptLanguage) != originals.end());
+    }
+
+    QPluginLoader loader(newInterpreter.pluginPath);
+    QVERIFY(loader.isLoaded() == success);
+}
+
+
+void SerialScriptEmbedderTest::addInterpreterTest_data()
+{
+    using namespace ScriptEmbedderNS;
+    QTest::addColumn<bool>("success");
+    QTest::addColumn<InterpreterEntry>("newInterpreter");
+    QTest::addColumn<QString>("errorStr");
+    QTest::addColumn<QString>("logMsg");
+
+    QTest::newRow("already exists")
+            << true
+            << InterpreterEntry("TestLanguage", PLUGIN_PATH)
+            << QString()
+            << QString("Interpreter for '%1' already exists.").arg("TestLanguage");
+
+    QTest::newRow("not an interpreter")
+            << false
+            << InterpreterEntry("TestLanguage", DIFF_PLUGIN_PATH)
+            << QString("Could not add interpreter: Plugin '%1' is not an interpreter plugin.").arg(DIFF_PLUGIN_PATH)
+            << QString("Could not add interpreter: Plugin '%1' is not an interpreter plugin.").arg(DIFF_PLUGIN_PATH);
+
+    QTest::newRow("invalid plugin path")
+            << false
+            << InterpreterEntry("TestLanguage", "notPlugin"+LIB_POSTFIX)
+            << QString("Could not add interpreter: Failed to load %1 plugin: %2.").arg("TestLanguage").arg("notPlugin"+LIB_POSTFIX)
+            << QString("Could not add interpreter: Failed to load %1 plugin: %2.").arg("TestLanguage").arg("notPlugin"+LIB_POSTFIX);
+
+    QTest::newRow("replace with valid")
+            << true
+            << InterpreterEntry("TestLanguage", PLUGIN_PATH2)
+            << QString()
+            << QString("Interpreter for '%1' replaced.").arg("TestLanguage");
 }
 
 

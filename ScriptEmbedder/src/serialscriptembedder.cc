@@ -196,6 +196,11 @@ bool SerialScriptEmbedder::addInterpreter(const InterpreterEntry& interpreter)
     }
 
     std::shared_ptr<InterpreterLoader> loader(new InterpreterLoader(interpreter));
+    if (loader->instance() == nullptr){
+        errorStr_ = "Could not add interpreter: " + loader->errorString();
+        logMsg(errorString());
+        return false;
+    }
     std::shared_ptr<ScriptInterpreter> interpreter_ptr(loader->instance()->getInstance());
 
     // Check if loading fails.
@@ -208,6 +213,7 @@ bool SerialScriptEmbedder::addInterpreter(const InterpreterEntry& interpreter)
 
     // Unload old interpreter
     if (it != loaders_.end()){
+        interpreters_.erase(interpreter.scriptLanguage);
         it->second->unloadPlugin();
     }
 
@@ -223,6 +229,8 @@ bool SerialScriptEmbedder::addInterpreter(const InterpreterEntry& interpreter)
 
     loaders_[interpreter.scriptLanguage] = loader;
     interpreters_[interpreter.scriptLanguage] = interpreter_ptr;
+    interpreter_ptr->SetScriptAPI(conf_.scriptAPI());
+    conf_.addInterpreter(interpreter);
     return true;
 }
 

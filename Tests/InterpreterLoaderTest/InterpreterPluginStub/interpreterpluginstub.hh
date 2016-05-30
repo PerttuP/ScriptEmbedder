@@ -11,6 +11,33 @@
 #include <QtPlugin>
 #include "interpreterplugin.hh"
 
+
+class InterpreterStub : public ScriptEmbedderNS::ScriptInterpreter
+{
+public:
+
+    InterpreterStub() : ScriptEmbedderNS::ScriptInterpreter() {}
+
+    virtual ~InterpreterStub() {}
+
+    void SetScriptAPI(std::shared_ptr<ScriptEmbedderNS::ScriptAPI> api)
+    {
+        Q_UNUSED(api);
+    }
+
+    ScriptRunResult runScript(const QString& script, const QStringList& params)
+    {
+        Q_UNUSED(script);
+        Q_UNUSED(params);
+        return ScriptRunResult();
+    }
+
+    QString language() const
+    {
+        return "TestLanguage";
+    }
+};
+
 /**
  * @brief The InterpreterPluginStub class
  * Stub implementation for InterpreterPlugin. This plugin is used for
