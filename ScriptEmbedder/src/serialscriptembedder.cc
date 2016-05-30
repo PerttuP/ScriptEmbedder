@@ -268,6 +268,7 @@ bool SerialScriptEmbedder::loadPlugins()
             return false;
         }
 
+        interpreter->SetScriptAPI(conf_.scriptAPI());
         interpreters_[it->first] = interpreter;
     }
 

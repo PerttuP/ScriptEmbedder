@@ -17,6 +17,7 @@ TEMPLATE = app
 INCLUDEPATH += \
     ../../../ScriptEmbedder/include \
     ../../../ScriptEmbedder/src \
+    ../InterpreterTestPlugin
 
 DEPENDPATH += \
     ../../../ScriptEmbedder/src \

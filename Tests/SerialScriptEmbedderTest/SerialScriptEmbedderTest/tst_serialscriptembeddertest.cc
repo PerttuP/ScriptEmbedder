@@ -1,6 +1,8 @@
 #include <QString>
 #include <QtTest>
 #include "serialscriptembedder.hh"
+#include "interpretertestplugin.hh"
+
 
 #ifdef Q_OS_WIN
 const QString PLUGIN_PATH = "../InterpreterTestPlugin/debug/InterpreterTestPlugin.dll";
@@ -77,6 +79,7 @@ void SerialScriptEmbedderTest::constructorTest()
         for (auto it = interpreters.begin(); it != interpreters.end(); ++it){
             QPluginLoader loader(it->second.pluginPath);
             QVERIFY(loader.isLoaded());
+            QVERIFY(((InterpreterTestPlugin*)(loader.instance()))->getApi() == api);
         }
     }
     else {
@@ -193,6 +196,7 @@ void SerialScriptEmbedderTest::resetTest()
         for (auto it = interpreters.begin(); it != interpreters.end(); ++it){
             QPluginLoader loader(it->second.pluginPath);
             QVERIFY(loader.isLoaded());
+            QVERIFY(((InterpreterTestPlugin*)(loader.instance()))->getApi() == api);
         }
     }
     else {

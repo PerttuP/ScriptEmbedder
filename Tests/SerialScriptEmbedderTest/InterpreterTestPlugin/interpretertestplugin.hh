@@ -15,17 +15,21 @@
  */
 class TestInterpreter : public ScriptEmbedderNS::ScriptInterpreter
 {
+    ScriptEmbedderNS::ScriptInterpreter::ScriptRunResult& nextResult;
+    std::shared_ptr<ScriptEmbedderNS::ScriptAPI>& myApi;
+    QString& latestScript;
+    QStringList& latestParams;
+
 public:
 
-    // Public members required to control and verify tests.
-    ScriptEmbedderNS::ScriptInterpreter::ScriptRunResult nextResult;
-    std::shared_ptr<ScriptEmbedderNS::ScriptAPI> myApi;
-    QString latestScript;
-    QStringList latestParams;
-
-    TestInterpreter() :
+    TestInterpreter(std::shared_ptr<ScriptEmbedderNS::ScriptAPI>& api,
+                    QString& script,
+                    QStringList& params,
+                    ScriptEmbedderNS::ScriptInterpreter::ScriptRunResult& result) :
         ScriptEmbedderNS::ScriptInterpreter(),
-        nextResult(), myApi(nullptr), latestScript(), latestParams() {}
+        nextResult(result), myApi(api), latestScript(script), latestParams(params)
+    {
+    }
 
     virtual ~TestInterpreter() {}
 
@@ -61,7 +65,9 @@ class InterpreterTestPlugin :
 
 public:
 
-    InterpreterTestPlugin() : QObject(), ScriptEmbedderNS::InterpreterPlugin() {}
+    InterpreterTestPlugin() :
+        QObject(), ScriptEmbedderNS::InterpreterPlugin(),
+        api_(nullptr), result_(), script_(), params_() {}
 
     virtual ~InterpreterTestPlugin() {}
 
@@ -72,8 +78,36 @@ public:
 
     ScriptEmbedderNS::ScriptInterpreter* getInstance() const
     {
-        return new TestInterpreter();
+        return new TestInterpreter(api_, script_, params_, result_);
     }
+
+    std::shared_ptr<ScriptEmbedderNS::ScriptAPI> getApi() const
+    {
+        return api_;
+    }
+
+    QString lastScript() const
+    {
+        return script_;
+    }
+
+    QStringList lastParams() const
+    {
+        return params_;
+    }
+
+    ScriptEmbedderNS::ScriptInterpreter::ScriptRunResult lastResult() const
+    {
+        return result_;
+    }
+
+
+private:
+
+    mutable std::shared_ptr<ScriptEmbedderNS::ScriptAPI> api_;
+    mutable ScriptEmbedderNS::ScriptInterpreter::ScriptRunResult result_;
+    mutable QString script_;
+    mutable QStringList params_;
 };
 
 
