@@ -12,6 +12,9 @@
 #include "interpreterplugin.hh"
 
 
+/**
+ * @brief The Actual 'interpreter' used in testing InterpreterLoader.
+ */
 class InterpreterStub : public ScriptEmbedderNS::ScriptInterpreter
 {
 public:
@@ -38,6 +41,7 @@ public:
     }
 };
 
+
 /**
  * @brief The InterpreterPluginStub class
  * Stub implementation for InterpreterPlugin. This plugin is used for
@@ -53,21 +57,29 @@ class InterpreterPluginStub :
 
 public:
 
-    InterpreterPluginStub();
+    InterpreterPluginStub() :
+        ScriptEmbedderNS::InterpreterPlugin() {}
 
-    virtual ~InterpreterPluginStub();
+    virtual ~InterpreterPluginStub() {}
 
     /**
      * @brief Stub implementation for the InterpreterPlugin interface
      * @return 'TestLanguage'.
      */
-    QString language() const;
+    QString language() const
+    {
+        return QString("TestLanguage");
+    }
+
 
     /**
      * @brief Stub implementation.
      * @return nullptr.
      */
-    ScriptEmbedderNS::ScriptInterpreter* getInstance() const;
+    ScriptEmbedderNS::ScriptInterpreter* getInstance() const
+    {
+        return new InterpreterStub();
+    }
 };
 
 #endif // INTERPRETERPLUGINSTUB_HH

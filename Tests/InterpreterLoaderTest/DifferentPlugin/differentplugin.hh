@@ -1,7 +1,14 @@
+/**
+ * @file
+ * @brief Defines a plugin stub for testing InterpreterLoader in erroneous cases.
+ * @author Perttu Paarlahti 2016.
+ */
+
 #ifndef DIFFERENTPLUGIN_HH
 #define DIFFERENTPLUGIN_HH
 
 #include <QObject>
+#include <cstdio>
 #include "differentplugininterface.hh"
 
 
@@ -13,11 +20,14 @@ class DifferentPlugin : public QObject, public DifferentPluginInterface
 
 public:
 
-    DifferentPlugin();
+    DifferentPlugin() {}
 
-    virtual ~DifferentPlugin();
+    virtual ~DifferentPlugin() {}
 
-    virtual void sayHello() const;
+    virtual void sayHello() const
+    {
+        printf("Hello world!");
+    }
 };
 
 #endif // DIFFERENTPLUGIN_HH

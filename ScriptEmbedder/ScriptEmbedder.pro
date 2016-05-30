@@ -7,7 +7,7 @@ CONFIG += c++11
 TEMPLATE = lib
 TARGET = ScriptEmbedder
 
-INCLUDEPATH += include
+INCLUDEPATH += include src
 
 HEADERS += \
     include/configuration.hh \
@@ -17,9 +17,11 @@ HEADERS += \
     include/interpreterplugin.hh \
     src/serialscriptembedder.hh \
     src/interpreterloader.hh \
-    include/scriptinterpreter.hh
+    include/scriptinterpreter.hh \
+    include/scriptembedderbuilder.hh
 
 SOURCES += \
     src/configuration.cc \
     src/serialscriptembedder.cc \
-    src/interpreterloader.cc
+    src/interpreterloader.cc \
+    include/scriptembedderbuilder.cc

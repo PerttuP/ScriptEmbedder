@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief Implements the SerialScriptEmbedder class defined in serialscriptembedder.hh.
+ * @author Perttu Paarlahti 2016.
+ */
+
 #include "serialscriptembedder.hh"
 #include <set>
 #include <QFileInfo>

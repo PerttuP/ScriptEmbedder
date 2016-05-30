@@ -10,6 +10,3 @@ HEADERS += \
     differentplugininterface.hh \
     differentplugin.hh
 
-SOURCES += \
-    differentplugin.cc
-
