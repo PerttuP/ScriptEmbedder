@@ -51,7 +51,7 @@ bool SerialScriptEmbedder::reset(const Configuration& conf)
         }
     }
 
-    logMsg("Configuration set successfully");
+    logMsg("Configuration set successfully.");
     errorStr_.clear();
     valid_ = true;
     return true;
@@ -123,20 +123,20 @@ bool SerialScriptEmbedder::addScript(const ScriptEntry& script)
     ScriptEntry entry = conf_.getScript(script.id);
     if (entry == script){
         // Identical script already exists.
-        logMsg("Script already exists.");
+        logMsg(QString("Script '%1' already exists.").arg(script.id));
         return true;
     }
     if (!conf_.hasInterpreter(script.scriptLanguage)){
         // There is no suitable interpreter for the script.
-        errorStr_ = QString("Could not add script: no suitable "
-                            "interpreter for language %1.")
-                .arg(script.scriptLanguage);
+        errorStr_ = QString("Could not add script '%1': No suitable "
+                            "interpreter for language '%2'.")
+                .arg(script.id).arg(script.scriptLanguage);
         logMsg(errorString());
         return false;
     }
     if (!QFileInfo::exists(script.scriptPath)){
         // Script file does not exist.
-        errorStr_ = QString("Could not add script: file '%1' does not exist")
+        errorStr_ = QString("Could not add script: file '%1' does not exist.")
                 .arg(script.scriptPath);
         logMsg(errorString());
         return false;
@@ -153,6 +153,9 @@ bool SerialScriptEmbedder::addScript(const ScriptEntry& script)
             return false;
         }
         scripts_[script.id] = scriptStr;
+    }
+    else if (scripts_.find(script.id) != scripts_.end()){
+        scripts_.erase(script.id);
     }
 
     // Add to configuration and send log messages.

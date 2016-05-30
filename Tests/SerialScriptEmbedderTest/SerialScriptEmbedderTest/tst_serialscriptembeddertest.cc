@@ -20,6 +20,42 @@ typedef std::map<unsigned, ScriptEmbedderNS::ScriptEntry> ScriptMap;
 Q_DECLARE_METATYPE(InterpreterMap)
 Q_DECLARE_METATYPE(ScriptMap)
 Q_DECLARE_METATYPE(std::shared_ptr<ScriptEmbedderNS::ScriptAPI>)
+Q_DECLARE_METATYPE(ScriptEmbedderNS::ScriptEntry)
+
+/**
+ * @brief Stub implementation for the Logger interface.
+ */
+class LoggerStub : public ScriptEmbedderNS::Logger
+{
+
+public:
+
+    QStringList logMessages;
+    std::vector<std::tuple<ScriptEmbedderNS::ScriptEntry, QStringList, int> > successes;
+    std::vector<std::tuple<ScriptEmbedderNS::ScriptEntry, QStringList, QString> > failures;
+
+    LoggerStub() :
+        ScriptEmbedderNS::Logger(), logMessages(), successes(), failures() {}
+
+    virtual ~LoggerStub() {}
+
+    void logMessage(const QString& msg)
+    {
+        logMessages.push_back(msg);
+    }
+
+    void scriptExecuted(const ScriptEmbedderNS::ScriptEntry& script,
+                        const QStringList& params, int returnValue)
+    {
+        successes.push_back( std::make_tuple(script, params, returnValue) );
+    }
+
+    void scriptFailed(const ScriptEmbedderNS::ScriptEntry& script,
+                      const QStringList& params, const QString& errorMsg)
+    {
+        failures.push_back( std::make_tuple(script, params, errorMsg));
+    }
+};
 
 
 /**
@@ -45,6 +81,12 @@ private Q_SLOTS:
      */
     void resetTest();
     void resetTest_data();
+
+    /**
+     * @brief Test the addScript method.
+     */
+    void addScriptTest();
+    void addScriptTest_data();
 };
 
 
@@ -179,6 +221,8 @@ void SerialScriptEmbedderTest::resetTest()
     SerialScriptEmbedder embedder(original);
     QVERIFY(embedder.isValid());
     QCOMPARE(embedder.errorString(), QString());
+    LoggerStub logger;
+    embedder.setLogger(&logger);
 
     // Reset
     Configuration conf(api, interpreters, scripts);
@@ -193,21 +237,46 @@ void SerialScriptEmbedderTest::resetTest()
         QVERIFY(embedder.configuration().scriptAPI() == api);
         QVERIFY(embedder.configuration().scripts() == scripts);
         QVERIFY(embedder.configuration().interpreters() == interpreters);
+
+        // New plugins are loaded.
         for (auto it = interpreters.begin(); it != interpreters.end(); ++it){
             QPluginLoader loader(it->second.pluginPath);
             QVERIFY(loader.isLoaded());
             QVERIFY(((InterpreterTestPlugin*)(loader.instance()))->getApi() == api);
         }
+        // Old, unused plugins are unloaded
+        InterpreterMap originalInterpreter = original.interpreters();
+        for (auto it=originalInterpreter.begin(); it!=originalInterpreter.end(); ++it){
+            QPluginLoader loader(it->second.pluginPath);
+            auto it2 = interpreters.find(it->first);
+            bool loaded = it2==interpreters.end() ? false : it2->second == it->second;
+            QCOMPARE(loader.isLoaded(), loaded);
+        }
+        // Check log message.
+        QCOMPARE(logger.logMessages.size(), QStringList::size_type(1));
+        QCOMPARE(logger.logMessages.at(0), QString("Configuration set successfully."));
+
     }
     else {
         // Conf is invalid.
         QVERIFY(embedder.configuration().scriptAPI() == nullptr);
         QVERIFY(embedder.configuration().scripts() == ScriptMap());
+
+        // New plugins are not loaded
         QVERIFY(embedder.configuration().interpreters() == InterpreterMap());
         for (auto it = interpreters.begin(); it != interpreters.end(); ++it){
             QPluginLoader loader(it->second.pluginPath);
             QVERIFY(!loader.isLoaded());
         }
+        // Old plugins are unloaded.
+        InterpreterMap originalInterpreter = original.interpreters();
+        for (auto it=originalInterpreter.begin(); it!=originalInterpreter.end(); ++it){
+            QPluginLoader loader(it->second.pluginPath);
+            QVERIFY(!loader.isLoaded());
+        }
+        // Check log message.
+        QCOMPARE(logger.logMessages.size(), QStringList::size_type(1));
+        QCOMPARE(logger.logMessages.at(0), errorStr);
     }
 }
 
@@ -215,6 +284,114 @@ void SerialScriptEmbedderTest::resetTest()
 void SerialScriptEmbedderTest::resetTest_data()
 {
     constructorTest_data();
+}
+
+
+void SerialScriptEmbedderTest::addScriptTest()
+{
+    using namespace ScriptEmbedderNS;
+    QFETCH(InterpreterMap, interpreters);
+    QFETCH(ScriptMap, registeredScripts);
+    QFETCH(ScriptEntry, script);
+    QFETCH(bool, success);
+    QFETCH(QString, errorStr);
+    QFETCH(QString, logMsg);
+
+    // Initialize embedder
+    std::shared_ptr<ScriptAPI> api(new ScriptAPI());
+    Configuration conf(api, interpreters, registeredScripts);
+    SerialScriptEmbedder embedder(conf);
+    QVERIFY(embedder.isValid());
+    LoggerStub logger;
+    embedder.setLogger(&logger);
+
+    // Add script.
+    bool ok = embedder.addScript(script);
+    QVERIFY(ok == success);
+    QCOMPARE(embedder.errorString(), errorStr);
+    QCOMPARE(logger.logMessages.size(), QStringList::size_type(1));
+    QCOMPARE(logger.logMessages.at(0), logMsg);
+
+    // Check current scripts
+    ScriptMap scriptsNow = embedder.configuration().scripts();
+    for (auto it = registeredScripts.begin(); it != registeredScripts.end(); ++it){
+        auto it2 = scriptsNow.find(it->first);
+        QVERIFY(it2 != scriptsNow.end());
+        if (it->second.id != script.id && success){
+            QCOMPARE(it->second, it2->second);
+        }
+    }
+    QCOMPARE(scriptsNow.find(script.id) != scriptsNow.end(),
+             success || registeredScripts.find(script.id) != registeredScripts.end());
+    if (success){
+        QCOMPARE(script, scriptsNow.at(script.id));
+    }
+}
+
+
+void SerialScriptEmbedderTest::addScriptTest_data()
+{
+    using namespace ScriptEmbedderNS;
+    QTest::addColumn<InterpreterMap>("interpreters");
+    QTest::addColumn<ScriptMap>("registeredScripts");
+    QTest::addColumn<ScriptEntry>("script");
+    QTest::addColumn<bool>("success");
+    QTest::addColumn<QString>("errorStr");
+    QTest::addColumn<QString>("logMsg");
+
+    const QString TEST_PATH = "testfiles/";
+
+    QTest::newRow("valid to RAM")
+            << InterpreterMap {{"TestLanguage", InterpreterEntry("TestLanguage", PLUGIN_PATH)}}
+            << ScriptMap()
+            << ScriptEntry(0u, TEST_PATH+"testscript.txt", "TestLanguage", true, 1u)
+            << true
+            << QString() << QString("Script '%1' added.").arg(0u);
+
+    QTest::newRow("valid not to RAM")
+            << InterpreterMap {{"TestLanguage", InterpreterEntry("TestLanguage", PLUGIN_PATH)}}
+            << ScriptMap()
+            << ScriptEntry(1u, TEST_PATH+"empty.txt", "TestLanguage", false, 1u)
+            << true
+            << QString() << QString("Script '%1' added.").arg(1u);
+
+    QTest::newRow("Already exists")
+            << InterpreterMap {{"TestLanguage", InterpreterEntry("TestLanguage", PLUGIN_PATH)}}
+            << ScriptMap {{1u, ScriptEntry(1u, TEST_PATH+"testscript.txt", "TestLanguage", true, 1u)}}
+            << ScriptEntry(1u, TEST_PATH+"testscript.txt", "TestLanguage", true, 1u)
+            << true
+            << QString() << QString("Script '%1' already exists.").arg(1u);
+
+    QTest::newRow("Replace")
+            << InterpreterMap {{"TestLanguage", InterpreterEntry("TestLanguage", PLUGIN_PATH)}}
+            << ScriptMap {{1u, ScriptEntry(1u, TEST_PATH+"testscript.txt", "TestLanguage", true, 1u)}}
+            << ScriptEntry(1u, TEST_PATH+"empty.txt", "TestLanguage", false, 1u)
+            << true
+            << QString() << QString("Script '%1' replaced.").arg(1u);
+
+    QTest::newRow("File does not exist")
+            << InterpreterMap {{"TestLanguage", InterpreterEntry("TestLanguage", PLUGIN_PATH)}}
+            << ScriptMap()
+            << ScriptEntry(1u, "nofile.txt", "TestLanguage", false, 1u)
+            << false
+            << QString("Could not add script: file '%1' does not exist.").arg("nofile.txt")
+            << QString("Could not add script: file '%1' does not exist.").arg("nofile.txt");
+
+    QTest::newRow("Empty script to RAM")
+            << InterpreterMap {{"TestLanguage", InterpreterEntry("TestLanguage", PLUGIN_PATH)}}
+            << ScriptMap {{1u, ScriptEntry(1u, TEST_PATH+"empty.txt", "TestLanguage", false, 1u)}}
+            << ScriptEntry(1u, TEST_PATH+"empty.txt", "TestLanguage", true, 1u)
+            << false
+            << QString("Could not add script %1: File '%2' does not open or is empty.").arg(1u).arg(TEST_PATH+"empty.txt")
+            << QString("Could not add script %1: File '%2' does not open or is empty.").arg(1u).arg(TEST_PATH+"empty.txt");
+
+    QTest::newRow("No interpreter")
+            << InterpreterMap {{"TestLanguage", InterpreterEntry("TestLanguage", PLUGIN_PATH)}}
+            << ScriptMap()
+            << ScriptEntry(0u, TEST_PATH+"testscript.txt", "DiffLang", true, 1u)
+            << false
+            << QString("Could not add script '%1': No suitable interpreter for language '%2'.").arg(0u).arg("DiffLang")
+            << QString("Could not add script '%1': No suitable interpreter for language '%2'.").arg(0u).arg("DiffLang");
 }
 
 
