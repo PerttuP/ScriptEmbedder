@@ -172,13 +172,14 @@ bool SerialScriptEmbedder::addScript(const ScriptEntry& script)
 void SerialScriptEmbedder::removeScript(unsigned scriptId)
 {
     if (!conf_.hasScript(scriptId)){
-        this->logMsg(QString("Could not remove script %1: No such script.")
+        this->logMsg(QString("Could not remove script '%1': No such script.")
                      .arg(scriptId));
         return;
     }
 
     conf_.removeScript(scriptId);
-    this->logMsg(QString("Script %1 removed").arg(scriptId));
+    scripts_.erase(scriptId);
+    this->logMsg(QString("Script '%1' removed.").arg(scriptId));
 }
 
 

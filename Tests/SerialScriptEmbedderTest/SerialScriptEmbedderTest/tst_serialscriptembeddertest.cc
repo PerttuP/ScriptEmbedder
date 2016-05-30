@@ -27,7 +27,6 @@ Q_DECLARE_METATYPE(ScriptEmbedderNS::ScriptEntry)
  */
 class LoggerStub : public ScriptEmbedderNS::Logger
 {
-
 public:
 
     QStringList logMessages;
@@ -87,6 +86,11 @@ private Q_SLOTS:
      */
     void addScriptTest();
     void addScriptTest_data();
+
+    /**
+     * @brief Test the removeScript method.
+     */
+    void removeScriptTest();
 };
 
 
@@ -393,6 +397,43 @@ void SerialScriptEmbedderTest::addScriptTest_data()
             << QString("Could not add script '%1': No suitable interpreter for language '%2'.").arg(0u).arg("DiffLang")
             << QString("Could not add script '%1': No suitable interpreter for language '%2'.").arg(0u).arg("DiffLang");
 }
+
+
+void SerialScriptEmbedderTest::removeScriptTest()
+{
+    using namespace ScriptEmbedderNS;
+    // Initialize embedder.
+    Configuration conf;
+    conf.setScriptAPI(std::shared_ptr<ScriptAPI>(new ScriptAPI()));
+    conf.addInterpreter(InterpreterEntry("TestLanguage", PLUGIN_PATH));
+    SerialScriptEmbedder embedder(conf);
+    QVERIFY(embedder.isValid());
+    ScriptEntry remainingScript(1u, "testfiles/empty.txt", "TestLanguage", false, 0u);
+    QVERIFY(embedder.addScript(remainingScript));
+    QVERIFY(embedder.addScript(ScriptEntry(0u, "testfiles/testscript.txt", "TestLanguage", true, 0u)) );
+    LoggerStub logger;
+    embedder.setLogger(&logger);
+
+    // Remove existing.
+    embedder.removeScript(0u);
+    QVERIFY(embedder.isValid());
+    QCOMPARE(embedder.errorString(), QString());
+    QCOMPARE(logger.logMessages.size(), QStringList::size_type(1));
+    QCOMPARE(logger.logMessages.at(0), QString("Script '%1' removed.").arg(0u));
+    QCOMPARE(embedder.configuration().scripts().size(), ScriptMap::size_type(1));
+    QCOMPARE(embedder.configuration().scripts().at(1u), remainingScript);
+
+
+    // Remove non-existing
+    embedder.removeScript(0u);
+    QVERIFY(embedder.isValid());
+    QCOMPARE(embedder.errorString(), QString());
+    QCOMPARE(logger.logMessages.size(), QStringList::size_type(2));
+    QCOMPARE(logger.logMessages.at(1), QString("Could not remove script '%1': No such script.").arg(0u));
+    QCOMPARE(embedder.configuration().scripts().size(), ScriptMap::size_type(1));
+    QCOMPARE(embedder.configuration().scripts().at(1u), remainingScript);
+}
+
 
 
 QTEST_APPLESS_MAIN(SerialScriptEmbedderTest)
