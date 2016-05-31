@@ -34,6 +34,8 @@ public:
 
     ~QtScriptApiAdapter();
 
+public slots:
+
     // Adapter methods for MyAPI
     void sayHello();
     void saySomething(const QString& msg, int repeat);

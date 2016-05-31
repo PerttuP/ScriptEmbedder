@@ -1,0 +1,1 @@
+HostAppAPI.saySomething(HostAppAPI.timeNow(), 3);

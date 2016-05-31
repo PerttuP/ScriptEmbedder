@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief Defines example interpreter for the QtScript language.
+ * @author Perttu Paarlahti 2016.
+ */
+
 #ifndef QTSCRIPTINTERPRETER_HH
 #define QTSCRIPTINTERPRETER_HH
 
@@ -6,6 +12,9 @@
 #include "qtscriptapiadapter.hh"
 #include <QScriptValue>
 
+/**
+ * @brief Example interpreter for the QtScript language.
+ */
 class QtScriptInterpreter : public ScriptEmbedderNS::ScriptInterpreter
 {
 public:

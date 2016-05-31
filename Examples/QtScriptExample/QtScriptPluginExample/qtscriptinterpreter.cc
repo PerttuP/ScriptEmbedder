@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief Implements the QtScriptInterpreter class defined in qtscriptinterpreter.hh.
+ * @author Perttu Paarlahti 2016.
+ */
+
 #include "qtscriptinterpreter.hh"
 #include <QScriptEngine>
 #include <QScriptValue>
@@ -23,7 +29,7 @@ void QtScriptInterpreter::SetScriptAPI(std::shared_ptr<ScriptEmbedderNS::ScriptA
     Q_ASSERT(api_ != nullptr);
     adapter_ = new QtScriptApiAdapter(api_.get(), &eng_);
     apiObject_ = eng_.newQObject(adapter_);
-    eng_.globalObject().setProperty("HostAppAPI", adapterVal);
+    eng_.globalObject().setProperty("HostAppAPI", apiObject_);
 }
 
 
@@ -40,9 +46,9 @@ QtScriptInterpreter::runScript(const QString& script, const QStringList& params)
     // Evaluate script.
     ScriptRunResult result;
     result.returnValue = eng_.evaluate(script).toInt32();
-    if (eng.hasUncaughtException()){
+    if (eng_.hasUncaughtException()){
         result.result = FAILURE;
-        result.errorString = eng.uncaughtException().toString();
+        result.errorString = eng_.uncaughtException().toString();
     }
 
     return result;

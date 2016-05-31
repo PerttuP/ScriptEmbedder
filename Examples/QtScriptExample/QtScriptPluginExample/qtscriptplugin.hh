@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief Defines example plugin for QtScript.  Used in QtScriptExample.
+ * @author Perttu Paarlahti 2016.
+ */
+
 #ifndef QTSCRIPTPLUGIN_HH
 #define QTSCRIPTPLUGIN_HH
 
@@ -5,6 +11,9 @@
 #include "interpreterplugin.hh"
 
 
+/**
+ * @brief Implements the InterpreterPlugin interface. Language: QtScript.
+ */
 class QtScriptPlugin : public QObject, ScriptEmbedderNS::InterpreterPlugin
 {
     Q_OBJECT
@@ -16,7 +25,7 @@ public:
     QtScriptPlugin();
     virtual ~QtScriptPlugin();
     QString language() const;
-    ScriptEmbedderNS::ScriptInterpreter*getInstance() const;
+    ScriptEmbedderNS::ScriptInterpreter* getInstance() const;
 };
 
 #endif // QTSCRIPTPLUGIN_HH
