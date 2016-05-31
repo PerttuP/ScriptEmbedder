@@ -4,4 +4,5 @@ CONFIG += ordered
 
 SUBDIRS += \
     ScriptEmbedder \
-    Tests
+    Tests \
+    Examples

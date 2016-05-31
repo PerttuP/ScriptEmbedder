@@ -24,4 +24,4 @@ SOURCES += \
     src/configuration.cc \
     src/serialscriptembedder.cc \
     src/interpreterloader.cc \
-    include/scriptembedderbuilder.cc
+    src/scriptembedderbuilder.cc
