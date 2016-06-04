@@ -22,6 +22,9 @@ const QString DIFF_PLUGIN_PATH = "../../InterpreterLoaderTest/DifferentPlugin/Di
 const QString LIB_POSTFIX = ".so";
 #endif
 
+const QString TEST_PATH = "../../../../ScriptEmbedder/Tests/SerialScriptEmbedderTest/SerialScriptEmbedderTest/testfiles/";
+
+
 
 // Meta type declarations.
 typedef std::map<QString, ScriptEmbedderNS::InterpreterEntry> InterpreterMap;
@@ -175,7 +178,6 @@ void SerialScriptEmbedderTest::constructorTest_data()
     QTest::addColumn<bool>("isValid");
     QTest::addColumn<QString>("errorStr");
 
-    const QString TEST_PATH = "testfiles/";
 
     QTest::newRow("valid plugins, no scripts")
             << std::shared_ptr<ScriptAPI>(new ScriptAPI())
@@ -243,8 +245,8 @@ void SerialScriptEmbedderTest::resetTest()
     Configuration original;
     original.setScriptAPI(std::shared_ptr<ScriptAPI>(new ScriptAPI));
     original.addInterpreter(InterpreterEntry("TestLanguage", PLUGIN_PATH));
-    original.addScript(ScriptEntry(0u, "testfiles/testscript.txt", "TestLanguage", true, 0u));
-    original.addScript(ScriptEntry(1u, "testfiles/empty.txt", "TestLanguage", false, 1u));
+    original.addScript(ScriptEntry(0u, TEST_PATH+"testscript.txt", "TestLanguage", true, 0u));
+    original.addScript(ScriptEntry(1u, TEST_PATH+"empty.txt", "TestLanguage", false, 1u));
     QVERIFY(original.isValid());
     SerialScriptEmbedder embedder(original);
     QVERIFY(embedder.isValid());
@@ -367,8 +369,6 @@ void SerialScriptEmbedderTest::addScriptTest_data()
     QTest::addColumn<QString>("errorStr");
     QTest::addColumn<QString>("logMsg");
 
-    const QString TEST_PATH = "testfiles/";
-
     QTest::newRow("valid to RAM")
             << InterpreterMap {{"TestLanguage", InterpreterEntry("TestLanguage", PLUGIN_PATH)}}
             << ScriptMap()
@@ -432,9 +432,9 @@ void SerialScriptEmbedderTest::removeScriptTest()
     conf.addInterpreter(InterpreterEntry("TestLanguage", PLUGIN_PATH));
     SerialScriptEmbedder embedder(conf);
     QVERIFY(embedder.isValid());
-    ScriptEntry remainingScript(1u, "testfiles/empty.txt", "TestLanguage", false, 0u);
+    ScriptEntry remainingScript(1u, TEST_PATH+"empty.txt", "TestLanguage", false, 0u);
     QVERIFY(embedder.addScript(remainingScript));
-    QVERIFY(embedder.addScript(ScriptEntry(0u, "testfiles/testscript.txt", "TestLanguage", true, 0u)) );
+    QVERIFY(embedder.addScript(ScriptEntry(0u, TEST_PATH+"testscript.txt", "TestLanguage", true, 0u)) );
     LoggerStub logger;
     embedder.setLogger(&logger);
 
@@ -590,11 +590,11 @@ void SerialScriptEmbedderTest::runScriptTest_data()
     QTest::addColumn<QString>("errorStr");
 
     QTest::newRow("success")
-            << ScriptMap {{0u, ScriptEntry(0u, "testfiles/testscript.txt", "TestLanguage", true, 1u)}}
+            << ScriptMap {{0u, ScriptEntry(0u, TEST_PATH+"testscript.txt", "TestLanguage", true, 1u)}}
             << 0u << QStringList{"1", "2", "abc"} << 1 << QString();
 
     QTest::newRow("failure")
-            << ScriptMap{{10u, ScriptEntry(10u, "testfiles/testscript.txt", "TestLanguage", false, 4u)}}
+            << ScriptMap{{10u, ScriptEntry(10u, TEST_PATH+"testscript.txt", "TestLanguage", false, 4u)}}
             << 10u << QStringList{"3,14", "asd", "0"} << 0 << QString("Syntax error");
 
     QTest::newRow("no such script")
@@ -602,9 +602,9 @@ void SerialScriptEmbedderTest::runScriptTest_data()
             << QString("Script '%1' does not exist.").arg(0u);
 
     QTest::newRow("does not open")
-            << ScriptMap{{1u, ScriptEntry(1u, "testfiles/empty.txt", "TestLanguage", false, 4u)}}
+            << ScriptMap{{1u, ScriptEntry(1u, TEST_PATH+"empty.txt", "TestLanguage", false, 4u)}}
             << 1u << QStringList{"a", "b", "124"} << 0
-            << QString("File '%1' does not open or is empty.").arg("testfiles/empty.txt");
+            << QString("File '%1' does not open or is empty.").arg(TEST_PATH+"empty.txt");
 }
 
 

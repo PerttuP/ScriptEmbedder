@@ -173,7 +173,7 @@ public:
     /**
      * @brief Add new interpreter.
      * @param interpreter New interpreter.
-     * @pre Iterpreter's scriptLanguate or pluginPath is not an empty string.
+     * @pre Iterpreter's scriptLanguate and pluginPath are not an empty strings.
      * @post If there already is an interpreter for same language, it will be
      *  replaced with the new one.
      */

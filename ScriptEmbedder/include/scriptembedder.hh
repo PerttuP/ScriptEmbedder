@@ -53,7 +53,7 @@ public:
 
     /**
      * @brief Check if ScriptEmbedder is in a valid state.
-     * This method may return false only after instantiation. Invalid object
+     * This method may return false only after instantiation or reset. Invalid object
      * cannot be used to run scripts. If this returns false, error message is
      * available in errorString(). If ScriptEmbedder is invalid, it may be
      * fixed by reseting.

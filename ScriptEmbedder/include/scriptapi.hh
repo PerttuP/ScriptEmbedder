@@ -15,7 +15,7 @@ namespace ScriptEmbedderNS
  * @brief This is the default empty implementation and base class
  * for user-defined APIs. Subclass your script api from this class.
  * if scripts are not needed to interact with the host application,
- * use this default implementation in ScriptEmbedder implementation.
+ * use this default implementation in ScriptEmbedder configuration.
  */
 class ScriptAPI
 {

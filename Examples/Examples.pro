@@ -1,4 +1,6 @@
 TEMPLATE = subdirs
 
-SUBDIRS += \
-    QtScriptExample
+if (qtHaveModule(script)){
+    SUBDIRS += QtScriptExample
+}
+

@@ -18,7 +18,8 @@ HEADERS += \
     src/serialscriptembedder.hh \
     src/interpreterloader.hh \
     include/scriptinterpreter.hh \
-    include/scriptembedderbuilder.hh
+    include/scriptembedderbuilder.hh \
+    doxygeninfo.hh
 
 SOURCES += \
     src/configuration.cc \
