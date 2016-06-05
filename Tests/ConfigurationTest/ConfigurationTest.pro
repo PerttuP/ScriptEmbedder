@@ -19,4 +19,11 @@ INCLUDEPATH += ../../ScriptEmbedder/include
 SOURCES += tst_configurationtest.cc \
            ../../ScriptEmbedder/src/configuration.cc
 
+OTHER_FILES += \
+    testfiles/notAnActualPlugin1.dll \
+    testfiles/notAnActualPlugin1.so \
+    testfiles/notAnActualPlugin1.txt \
+    testfiles/notAPythonScript1.py \
+    testfiles/notJS.js
+
 DEFINES += SRCDIR=\\\"$$PWD/\\\"

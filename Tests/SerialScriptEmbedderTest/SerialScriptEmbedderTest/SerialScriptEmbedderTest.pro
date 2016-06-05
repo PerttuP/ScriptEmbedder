@@ -29,5 +29,9 @@ SOURCES += \
     ../../../ScriptEmbedder/src/configuration.cc \
     ../../../ScriptEmbedder/src/interpreterloader.cc \
 
+OTHER_FILES += \
+    testfiles/empty.txt \
+    testfiles/testscript.txt
+
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
