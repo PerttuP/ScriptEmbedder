@@ -85,10 +85,16 @@ public:
 private Q_SLOTS:
 
     /**
-     * @brief constructorTest
+     * @brief Test constructor in both successive and non-successive cases.
      */
     void constructorTest();
     void constructorTest_data();
+
+    /**
+     * @brief Test destructor.
+     */
+    void destructorTest();
+    void destructorTest_data();
 
     /**
      * @brief Test reseting configuration.
@@ -229,6 +235,37 @@ void SerialScriptEmbedderTest::constructorTest_data()
             << false
             << QString("Configuration failed: source file '%1' for script '%2' does not open or is empty.")
                .arg(TEST_PATH + "empty.txt").arg(0u);
+}
+
+
+void SerialScriptEmbedderTest::destructorTest()
+{
+    using namespace ScriptEmbedderNS;
+    QFETCH(std::shared_ptr<ScriptAPI>, api);
+    QFETCH(InterpreterMap, interpreters);
+    QFETCH(ScriptMap, scripts);
+    QFETCH(bool, isValid);
+    QFETCH(QString, errorStr);
+
+
+    {
+        Configuration conf(api, interpreters, scripts);
+        SerialScriptEmbedder embedder(conf);
+        QCOMPARE(embedder.isValid(), isValid);
+        QCOMPARE(embedder.errorString(), errorStr);
+    } // Destructor is called.
+
+    // Verify that interpreters are unloaded
+    for (auto it = interpreters.begin(); it != interpreters.end(); ++it){
+        QPluginLoader loader(it->second.pluginPath);
+        QVERIFY(!loader.isLoaded());
+    }
+}
+
+
+void SerialScriptEmbedderTest::destructorTest_data()
+{
+    constructorTest_data();
 }
 
 
